@@ -1,0 +1,11 @@
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+jinja2>=3.1.2
+aiofiles>=23.2.1
+# Removed: sounddevice>=0.4.6 - no longer needed for client-side recording
+numpy>=1.24.3
+scipy>=1.11.4
+setuptools>=68.0.0
+wheel>=0.41.0
+faster-whisper>=0.10.0 

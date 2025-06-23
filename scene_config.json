@@ -1,0 +1,21 @@
+{
+    "transkript_directory": "web/transkripte",
+    "scene_directory": "web/scene",
+    "outputs_directory": "outputs",
+    "log_level": "INFO",
+    "logging": {
+        "main_log_file": "scene_runner.log",
+        "error_log_file": "scene_errors.log"
+    },
+    "services": {
+        "ollama": {
+            "model": "deepseek-r1:8b",
+            "temperature": 0.7,
+            "max_tokens": 1000
+        },
+        "image_generation": {
+            "config_file": "img_gen_service.json",
+            "timeout_seconds": 300
+        }
+    }
+}

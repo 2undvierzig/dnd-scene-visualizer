@@ -1,0 +1,2 @@
+# This file ensures the transkripte directory is tracked by git
+# while ignoring the actual transcript files 

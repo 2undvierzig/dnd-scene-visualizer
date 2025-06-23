@@ -1,0 +1,20 @@
+numpy>=1.24.0
+PyAudio>=0.2.13
+faster-whisper>=0.9.0
+torch>=2.0.0  # Wird für CUDA-Unterstützung benötigt
+ctranslate2>=3.22.0  # Wird von faster-whisper benötigt
+ffmpeg-python>=0.2.0  # Wird für Audio-Verarbeitung benötigt
+setuptools>=65.5.1  # Wird für einige Abhängigkeiten benötigt 
+
+flask==2.3.3
+flask-socketio==5.3.6
+python-socketio==5.8.0
+python-engineio==4.7.1
+
+# Scene Visualizer Abhängigkeiten
+ollama>=0.3.3
+watchdog>=4.0.0
+diffusers>=0.30.0
+transformers>=4.44.0
+accelerate>=0.33.0
+huggingface-hub>=0.24.5

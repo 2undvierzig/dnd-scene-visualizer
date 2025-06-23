@@ -1,0 +1,44 @@
+{
+    "interval_minutes": 5,
+    "max_retries": 3,
+    "retry_delay_seconds": 30,
+    "service_timeout_seconds": 300,
+    "health_check_interval_seconds": 60,
+    "outputs_directory": "outputs",
+    "log_level": "DEBUG",
+    "logging": {
+        "main_log_file": "dnd_runner.log",
+        "ollama_log_file": "ollama_service.log",
+        "error_log_file": "dnd_errors.log",
+        "max_log_size_mb": 10,
+        "backup_count": 5,
+        "log_subprocess_output": true
+    },
+    "services": {
+        "ollama": {
+            "script_path": "./run_ollama.sh",
+            "health_check_url": "http://localhost:11434/api/tags",
+            "startup_wait_seconds": 30,
+            "required_model": "deepseek-r1:8b"
+        },
+        "image_generation": {
+            "config_file": "img_gen_service.json",
+            "health_check_timeout": 30,
+            "startup_wait_seconds": 60,
+            "max_retries": 3,
+            "retry_delay": 10
+        }
+    },
+    "transcript": {
+        "file_path": "transcript.txt",
+        "min_entries_required": 1,
+        "last_minutes": 5
+    },
+    "image_generation": {
+        "timeout_seconds": 600,
+        "max_concurrent": 1,
+        "fallback_mode": "prompt_only",
+        "skip_on_service_failure": false,
+        "mock_service": false
+    }
+} 

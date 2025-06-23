@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recording App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 50%, #0d0502 100%);
+            min-height: 100vh;
+            font-family: 'Cinzel Decorative', serif; /* Epic font for all text */
+            margin: 0;
+            padding: 0;
+            color: #d4af37;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .card {
+            border: 2px solid #8b4513;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+            background: linear-gradient(145deg, #3d2817 0%, #2a1a0f 100%);
+            color: #d4af37;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+            font-family: 'Cinzel Decorative', serif;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
+            background: linear-gradient(145deg, #a0522d 0%, #8b4513 100%);
+            border-color: #ffd700;
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: linear-gradient(145deg, #228b22 0%, #006400 100%);
+            border: 2px solid #32cd32;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+            font-family: 'Cinzel Decorative', serif;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(50, 205, 50, 0.4);
+            background: linear-gradient(145deg, #32cd32 0%, #228b22 100%);
+            color: #fff;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(145deg, #8b0000 0%, #4b0000 100%);
+            border: 2px solid #dc143c;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+            font-family: 'Cinzel Decorative', serif;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(220, 20, 60, 0.4);
+            background: linear-gradient(145deg, #dc143c 0%, #8b0000 100%);
+            color: #fff;
+        }
+        
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 2px solid #8b4513;
+            padding: 8px 12px;
+            background: linear-gradient(145deg, #2a1a0f 0%, #1a0f0a 100%);
+            color: #d4af37;
+            font-family: 'Cinzel Decorative', serif;
+            transition: all 0.3s ease;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+            background: linear-gradient(145deg, #3d2817 0%, #2a1a0f 100%);
+            color: #ffd700;
+        }
+        
+        .form-select option {
+            background: #2a1a0f;
+            color: #d4af37;
+        }
+        
+        .recording-indicator {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .recording-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .recording-item {
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #8b4513;
+            transition: all 0.3s ease;
+            color: #d4af37;
+        }
+        
+        .recording-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+            border-color: #d4af37;
+        }
+        
+        /* Audio Player Styles */
+        .audio-player {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .audio-player.active {
+            display: block;
+        }
+        
+        .audio-progress {
+            width: 100%;
+            height: 8px;
+            background: #3d2817;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .audio-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #d4af37 0%, #ffd700 100%);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .audio-progress-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #ffd700;
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .audio-progress-handle:active {
+            cursor: grabbing;
+        }
+        
+        .audio-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #e0e0e0;
+            margin-top: 5px;
+        }
+        
+        /* Cinema Mode Styles */
+        .cinema-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: pointer;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .cinema-overlay.active {
+            display: flex;
+        }
+        
+        .cinema-image-container {
+            position: relative;
+            max-width: 95vw;
+            max-height: 95vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cinema-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
+            transition: opacity 2s ease-in-out;
+        }
+        
+        .cinema-image.fade-out {
+            opacity: 0;
+        }
+        
+        .cinema-image.fade-in {
+            opacity: 1;
+        }
+        
+        .cinema-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10000;
+        }
+        
+        .cinema-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cinzel Decorative', serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .cinema-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Auto-hide cursor in cinema mode */
+        .cinema-overlay.hide-cursor {
+            cursor: none;
+        }
+        
+        .cinema-overlay.hide-cursor * {
+            cursor: none;
+        }
+        
+        .transcript-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .transcript-item {
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #8b4513;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #d4af37;
+        }
+        
+        .transcript-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+            background: linear-gradient(145deg, #2c1810 0%, #3d2817 100%);
+            border-color: #d4af37;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 1px solid;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            font-family: 'Cinzel Decorative', serif;
+        }
+        
+        .status-recording {
+            background: linear-gradient(145deg, #8b0000 0%, #4b0000 100%);
+            border-color: #dc143c;
+            color: white;
+        }
+        
+        .status-ready {
+            background: linear-gradient(145deg, #228b22 0%, #006400 100%);
+            border-color: #32cd32;
+            color: white;
+        }
+        
+        /* Fix text-muted visibility on dark background */
+        .text-muted {
+            color: #ffffff !important; /* White text for better contrast */
+        }
+        
+        small.text-muted {
+            color: #e0e0e0 !important; /* Light grey for small text */
+        }
+        
+        /* Ensure all small text is visible */
+        small {
+            color: #e0e0e0 !important; /* Light grey for better visibility */
+        }
+        
+        /* Fix debug info visibility */
+        .small {
+            color: #e0e0e0 !important;
+        }
+        
+        /* System information text */
+        #systemInfo div {
+            color: #ffffff !important;
+        }
+        
+        #cudaStatus, #whisperStatus, #deviceInfo, #transcriptionStatus {
+            color: #ffffff !important;
+            font-weight: bold;
+        }
+        
+        #debugInfo {
+            color: #e0e0e0 !important;
+        }
+        
+        /* Ensure all text in cards is visible */
+        .card-body div {
+            color: #d4af37;
+        }
+        
+        .card-body strong {
+            color: #ffffff !important;
+        }
+        
+        /* D&D Tab Styling */
+        .nav-tabs {
+            border: none;
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 2px rgba(212, 175, 55, 0.1);
+            margin: 0;
+            border-bottom: 3px solid #8b4513;
+        }
+        
+        .nav-tabs .nav-link {
+            border: 2px solid #654321;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            color: #b8860b;
+            font-weight: 700;
+            padding: 0.5rem 1.5rem;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #2a1a0f 0%, #1a0f0a 100%);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            font-size: 0.9rem;
+            font-family: 'Cinzel Decorative', serif;
+        }
+        
+        .tab-navigation {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .tab-content {
+            min-height: calc(100vh - 60px);
+            padding: 1rem;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            border-color: #d4af37;
+            background: linear-gradient(145deg, #3d2817 0%, #2a1a0f 100%);
+            color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+        }
+        
+        .nav-tabs .nav-link.active {
+            border: 2px solid #d4af37;
+            background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            box-shadow: 0 6px 12px rgba(212, 175, 55, 0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+        }
+        
+        .nav-tabs .nav-link.active:hover {
+            background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+            color: #fff !important;
+        }
+        
+        /* Tab content animation */
+        .tab-pane {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scene Display Styles */
+        .scene-image-container {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border: 3px solid #8b4513;
+        }
+        
+        .scene-description {
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            border: 2px solid #8b4513;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .scene-metadata {
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            border: 1px solid #654321;
+        }
+        
+        .scene-history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .scene-history-item {
+            background: linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #8b4513;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #d4af37;
+        }
+        
+        .scene-history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+            background: linear-gradient(145deg, #2c1810 0%, #3d2817 100%);
+            border-color: #d4af37;
+        }
+        
+        .scene-history-item.active {
+            border-color: #ffd700;
+            background: linear-gradient(145deg, #3d2817 0%, #4d3827 100%);
+        }
+        
+        .scene-thumbnail {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #8b4513;
+        }
+        
+        /* Scene status badges */
+        .badge-scene-complete {
+            background: linear-gradient(145deg, #228b22 0%, #006400 100%);
+            border: 1px solid #32cd32;
+        }
+        
+        .badge-scene-processing {
+            background: linear-gradient(145deg, #ff8c00 0%, #ff6347 100%);
+            border: 1px solid #ffa500;
+        }
+        
+        .badge-scene-waiting {
+            background: linear-gradient(145deg, #696969 0%, #4b4b4b 100%);
+            border: 1px solid #808080;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <ul class="nav nav-tabs nav-fill" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="mikro-tab" data-bs-toggle="tab" data-bs-target="#mikro-panel" type="button" role="tab" aria-controls="mikro-panel" aria-selected="true">
+                        <i class="fas fa-microphone me-2"></i>Mikro & Transkript
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="szene-tab" data-bs-toggle="tab" data-bs-target="#szene-panel" type="button" role="tab" aria-controls="szene-panel" aria-selected="false">
+                        <i class="fas fa-video me-2"></i>Szene
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Mikro & Transkript Tab -->
+            <div class="tab-pane fade show active" id="mikro-panel" role="tabpanel" aria-labelledby="mikro-tab">
+                
+                                <!-- System Information -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-3">
+                            <div class="card-body py-2">
+                                <h6 class="card-title mb-2">
+                                    <i class="fas fa-info-circle"></i> System Information
+                                </h6>
+                                <div id="systemInfo" class="row">
+                                    <div class="col-md-3">
+                                        <small class="text-muted">CUDA:</small>
+                                        <div id="cudaStatus">Lädt...</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Whisper:</small>
+                                        <div id="whisperStatus">Lädt...</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Device:</small>
+                                        <div id="deviceInfo">Lädt...</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Transcription:</small>
+                                        <div id="transcriptionStatus">Lädt...</div>
+                                    </div>
+                                </div>
+                                <!-- Debug Info -->
+                                <div class="mt-2 text-muted small">
+                                    <span id="debugInfo">Client-side recording: <strong>ACTIVE</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        <div class="row">
+            <!-- Normal Recording Controls -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-play-circle"></i> Einzelne Aufnahme
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Device Selection -->
+                        <div class="mb-3">
+                            <label for="deviceSelect" class="form-label fw-bold">
+                                <i class="fas fa-microphone"></i> Audiogerät auswählen
+                            </label>
+                            <select class="form-select" id="deviceSelect">
+                                <option value="">Gerät wird geladen...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Duration Selection -->
+                        <div class="mb-3">
+                            <label for="durationInput" class="form-label fw-bold">
+                                <i class="fas fa-clock"></i> Aufnahmedauer (Sekunden)
+                            </label>
+                            <input type="number" class="form-control" id="durationInput" value="10" min="1" max="60">
+                        </div>
+                        
+                        <!-- Recording Controls -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" id="startBtn" onclick="startRecording()">
+                                <i class="fas fa-play"></i> Aufnahme starten
+                            </button>
+                            <button class="btn btn-danger" id="stopBtn" onclick="stopRecording()" disabled>
+                                <i class="fas fa-stop"></i> Aufnahme stoppen
+                            </button>
+                        </div>
+                        
+                        <!-- Status Display -->
+                        <div class="mt-3 text-center">
+                            <span id="statusBadge" class="status-badge status-ready">
+                                <i class="fas fa-check-circle"></i> Bereit
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Continuous Recording Controls -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-theater-masks"></i> Kontinuierliche Szenen-Aufnahme
+                            <span id="continuousStatusBadge" class="badge bg-secondary ms-2">Bereit</span>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Continuous Device Selection -->
+                        <div class="mb-3">
+                            <label for="continuousDeviceSelect" class="form-label fw-bold">
+                                <i class="fas fa-microphone"></i> Audiogerät für Szenen-Aufnahme
+                            </label>
+                            <select class="form-select" id="continuousDeviceSelect">
+                                <option value="">Gerät wird geladen...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Scene Duration Selection -->
+                        <div class="mb-3">
+                            <label for="sceneDurationInput" class="form-label fw-bold">
+                                <i class="fas fa-hourglass-half"></i> Szenen-Dauer (Minuten)
+                            </label>
+                            <input type="number" class="form-control" id="sceneDurationInput" value="1" min="0.5" max="10" step="0.5">
+                            <small class="text-muted">Bereich: 0.5 - 10 Minuten pro Szene</small>
+                        </div>
+                        
+                        <!-- Continuous Recording Info -->
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Aktuelle Dauer:</small>
+                                    <div id="currentSceneDuration"><strong>1.0 Min</strong></div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Queue-Größe:</small>
+                                    <div id="queueSize"><strong>0</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Continuous Recording Controls -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" id="startContinuousBtn" onclick="startContinuousRecording()">
+                                <i class="fas fa-theater-masks"></i> Szenen-Aufnahme starten
+                            </button>
+                            <button class="btn btn-danger" id="stopContinuousBtn" onclick="stopContinuousRecording()" disabled>
+                                <i class="fas fa-stop"></i> Szenen-Aufnahme stoppen
+                            </button>
+                        </div>
+                        
+                        <!-- Continuous Stats Display -->
+                        <div class="mt-3">
+                            <div id="continuousStats" class="p-2 bg-dark rounded" style="display: none;">
+                                <small class="text-muted">Statistiken:</small>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small>Szenen:</small>
+                                        <div id="totalScenes">0</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small>Gesamtzeit:</small>
+                                        <div id="totalDuration">0 min</div>
+                                    </div>
+                                </div>
+                                <div class="row mt-1">
+                                    <div class="col-6">
+                                        <small>Gestartet:</small>
+                                        <div id="startTime">-</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small>Nächste Szene in:</small>
+                                        <div id="nextSceneIn">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recordings List - Full Width -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-list"></i> Aufnahmen
+                            <button class="btn btn-primary btn-sm float-end" onclick="loadRecordings()">
+                                <i class="fas fa-refresh"></i> Aktualisieren
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="recordingsList" class="recording-list">
+                            <p class="text-center text-muted">Lade Aufnahmen...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transcripts Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-scroll"></i> Transkripte
+                            <button class="btn btn-primary btn-sm float-end" onclick="loadTranscripts()">
+                                <i class="fas fa-refresh"></i> Aktualisieren
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="transcriptsList" class="transcript-list">
+                            <p class="text-center text-muted">Lade Transkripte...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transcript Viewer -->
+        <div class="row mb-4" id="transcriptViewerSection" style="display: none;">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-file-text"></i> Transkript Viewer
+                            <button class="btn btn-secondary btn-sm float-end" onclick="closeTranscriptViewer()">
+                                <i class="fas fa-times"></i> Schließen
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="transcriptViewer">
+                            <div class="mb-3">
+                                <strong>Datei:</strong> <span id="viewerFilename"></span>
+                            </div>
+                            <hr>
+                            <div id="transcriptContent" class="p-3 bg-dark text-light rounded" style="white-space: pre-wrap; font-family: 'Courier New', monospace; max-height: 600px; overflow-y: auto;">
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" onclick="copyTranscriptContent()">
+                                    <i class="fas fa-copy"></i> Inhalt kopieren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+            </div>
+            <!-- End Mikro & Transkript Tab -->
+            
+            <!-- Szene Tab -->
+            <div class="tab-pane fade" id="szene-panel" role="tabpanel" aria-labelledby="szene-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Scene Display Card -->
+                        <div class="card">
+                            <div class="card-header bg-transparent border-bottom-0 pt-4">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-video"></i> Aktuelle Szene
+                                    <span id="sceneStatusBadge" class="badge bg-secondary ms-2">Warte auf Szene...</span>
+                                    <button class="btn btn-primary btn-sm float-end" onclick="refreshScene()">
+                                        <i class="fas fa-refresh"></i> Aktualisieren
+                                    </button>
+                                    <button id="returnToLatestBtn" class="btn btn-success btn-sm float-end me-2" onclick="returnToLatestScene()" style="display: none;">
+                                        <i class="fas fa-arrow-right"></i> Zur neuesten Szene
+                                    </button>
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <!-- Cinema Mode Button - Prominent placement -->
+                                <div class="text-center mb-4">
+                                    <button id="cinemaBtn" class="btn btn-warning btn-lg" onclick="enterCinemaMode()" title="Vollbild Cinema-Modus für immersive D&D-Szenen" style="display: none;">
+                                        <i class="fas fa-film me-2"></i> 🎬 CINEMA MODUS
+                                    </button>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Vollbild-Darstellung mit automatischen Szenen-Updates</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Loading State -->
+                                <div id="sceneLoading" class="text-center py-5">
+                                    <div class="spinner-border text-warning" role="status">
+                                        <span class="visually-hidden">Lädt...</span>
+                                    </div>
+                                    <p class="mt-3">Warte auf neue Szene...</p>
+                                    <small class="text-muted">Das System generiert automatisch Bilder zu den neuesten Transkripten.</small>
+                                </div>
+                                
+                                <!-- Scene Content (hidden initially) -->
+                                <div id="sceneContent" style="display: none;">
+                                    <!-- Scene Image -->
+                                    <div class="scene-image-container mb-4">
+                                        <img id="sceneImage" src="" alt="Szene" class="img-fluid w-100 rounded" style="max-height: 80vh; object-fit: contain;">
+                                    </div>
+                                    
+                                    <!-- Scene Description -->
+                                    <div class="scene-description p-4 bg-dark rounded">
+                                        <h5 class="mb-3"><i class="fas fa-scroll"></i> Szenenbeschreibung</h5>
+                                        <p id="sceneDescription" class="lead" style="font-family: 'Cinzel Decorative', serif; color: #ffd700; line-height: 1.8;">
+                                            <!-- Scene description will be inserted here -->
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Scene Metadata -->
+                                    <div class="scene-metadata mt-3 p-3 bg-dark rounded">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Szenen-Name:</small>
+                                                <div id="sceneName" style="color: #ffffff;">-</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Generiert am:</small>
+                                                <div id="sceneGeneratedTime" style="color: #ffffff;">-</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Stimmung:</small>
+                                                <div id="sceneMood" style="color: #ffffff;">-</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Generierungszeit:</small>
+                                                <div id="sceneGenerationTime" style="color: #ffffff;">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Error State -->
+                                <div id="sceneError" class="alert alert-danger" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle"></i> <span id="sceneErrorMessage">Fehler beim Laden der Szene</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Scene History -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-transparent border-bottom-0 pt-4">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-history"></i> Szenen-Historie
+                                    <button class="btn btn-primary btn-sm float-end" onclick="loadSceneHistory()">
+                                        <i class="fas fa-refresh"></i> Aktualisieren
+                                    </button>
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="sceneHistoryList" class="scene-history-list">
+                                    <p class="text-center text-muted">Lade Szenen-Historie...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Szene Tab -->
+            
+        </div>
+        <!-- End Tab Content -->
+    </div>
+
+    <!-- Cinema Mode Overlay -->
+    <div id="cinemaOverlay" class="cinema-overlay">
+        <div class="cinema-image-container">
+            <img id="cinemaImage" class="cinema-image fade-in" src="" alt="Szene im Cinema-Modus">
+            
+            <!-- Cinema Controls -->
+            <div class="cinema-controls">
+                <button class="cinema-btn" onclick="exitCinemaMode()" title="Cinema-Modus verlassen (ESC)">
+                    <i class="fas fa-times"></i> Verlassen
+                </button>
+            </div>
+            
+            <!-- Scene Info removed for clean cinema experience -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/audio-recorder.js"></script>
+    <script>
+        // Client-side audio recorder instances
+        let audioRecorder = null;
+        let continuousRecorder = null;
+        
+        // Legacy variables (kept for compatibility)
+        let isRecording = false;
+        let recordingTimer = null;
+        
+        // Use client-side recording flag
+        const USE_CLIENT_RECORDING = true;
+        
+        // Global variables for scene timer
+        let sceneStartTime = null;
+        let sceneDurationSeconds = 60;
+        
+        // Update scene countdown timer
+        function updateSceneTimer() {
+            if (!sceneStartTime || !isContinuousRecording) {
+                document.getElementById('nextSceneIn').textContent = '-';
+                return;
+            }
+            
+            const now = Date.now();
+            const elapsed = Math.floor((now - sceneStartTime) / 1000);
+            const remaining = Math.max(0, sceneDurationSeconds - elapsed);
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            document.getElementById('nextSceneIn').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (remaining === 0) {
+                // Reset timer for next scene
+                sceneStartTime = Date.now();
+            }
+        }
+        
+        // Load audio devices on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 DND Audio Recording App loaded');
+            
+            loadSystemInfo();
+            loadDevices();
+            loadRecordings();
+            loadTranscripts();
+            setInterval(checkRecordingStatus, 1000);
+            setInterval(checkTranscriptionStatus, 2000);
+            setInterval(checkLatestSceneTranscription, 3000); // Check for new scene transcriptions
+            setInterval(updateSceneTimer, 1000); // Update scene timer
+            
+            // Update scene duration display when changed
+            document.getElementById('sceneDurationInput').addEventListener('input', function() {
+                const duration = parseFloat(this.value);
+                document.getElementById('currentSceneDuration').innerHTML = `<strong>${duration} Min</strong>`;
+            });
+            
+            // Expose emergency reset function to global scope for debugging
+            window.emergencyResetContinuousRecording = emergencyResetContinuousRecording;
+            console.log('💡 Debug: Use emergencyResetContinuousRecording() in console if needed');
+        });
+        
+        async function loadSystemInfo() {
+            try {
+                const response = await fetch('/api/system-info');
+                const data = await response.json();
+                
+                // Update CUDA status
+                const cudaStatus = document.getElementById('cudaStatus');
+                if (data.cuda_available) {
+                    cudaStatus.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Verfügbar</span>`;
+                } else {
+                    cudaStatus.innerHTML = `<span class="text-warning"><i class="fas fa-times"></i> Nicht verfügbar</span>`;
+                }
+                
+                // Update Whisper status
+                const whisperStatus = document.getElementById('whisperStatus');
+                if (data.whisper_available && data.transcription_model_loaded) {
+                    whisperStatus.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Geladen</span>`;
+                } else {
+                    whisperStatus.innerHTML = `<span class="text-danger"><i class="fas fa-times"></i> Nicht verfügbar</span>`;
+                }
+                
+                // Update Device info
+                const deviceInfo = document.getElementById('deviceInfo');
+                if (data.cuda_available && data.device_info.name) {
+                    deviceInfo.innerHTML = `<span class="text-info">${data.device_info.name}</span><br><small>${data.device_info.memory_gb}GB</small>`;
+                } else {
+                    deviceInfo.innerHTML = `<span class="text-muted">CPU</span>`;
+                }
+                
+                // Update transcription status
+                const transcriptionStatus = document.getElementById('transcriptionStatus');
+                if (data.transcription_model_loaded) {
+                    transcriptionStatus.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Bereit</span>`;
+                } else {
+                    transcriptionStatus.innerHTML = `<span class="text-danger"><i class="fas fa-times"></i> Deaktiviert</span>`;
+                }
+                
+                console.log('📊 System Info:', data);
+            } catch (error) {
+                console.error('Error loading system info:', error);
+            }
+        }
+        
+        async function loadDevices() {
+            if (USE_CLIENT_RECORDING) {
+                // Client-side: Get browser audio devices
+                try {
+                    // Initialize audio recorder if not already done
+                    if (!audioRecorder) {
+                        audioRecorder = new AudioRecorder();
+                    }
+                    
+                    const devices = await audioRecorder.getAudioDevices();
+                    
+                    const select = document.getElementById('deviceSelect');
+                    select.innerHTML = '<option value="">Gerät auswählen...</option>';
+                    
+                    const continuousSelect = document.getElementById('continuousDeviceSelect');
+                    continuousSelect.innerHTML = '<option value="">Gerät auswählen...</option>';
+                    
+                    devices.forEach(device => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.textContent = device.label || `Audiogerät ${device.deviceId.substr(0, 8)}`;
+                        select.appendChild(option);
+                        
+                        const continuousOption = document.createElement('option');
+                        continuousOption.value = device.deviceId;
+                        continuousOption.textContent = device.label || `Audiogerät ${device.deviceId.substr(0, 8)}`;
+                        continuousSelect.appendChild(continuousOption);
+                    });
+                    
+                    console.log('✅ Client audio devices loaded:', devices.length);
+                } catch (error) {
+                    console.error('Error loading client devices:', error);
+                    
+                    // Show error with permission hint
+                    const errorMsg = error.message.includes('Permission') 
+                        ? 'Mikrofon-Berechtigung verweigert. Bitte erlauben Sie den Zugriff.'
+                        : 'Fehler beim Laden der Geräte';
+                    
+                    document.getElementById('deviceSelect').innerHTML = `<option value="">${errorMsg}</option>`;
+                    document.getElementById('continuousDeviceSelect').innerHTML = `<option value="">${errorMsg}</option>`;
+                }
+            } else {
+                // Server-side: Original implementation
+                try {
+                    const response = await fetch('/api/devices');
+                    const data = await response.json();
+                    
+                    const select = document.getElementById('deviceSelect');
+                    select.innerHTML = '<option value="">Gerät auswählen...</option>';
+                    
+                    const continuousSelect = document.getElementById('continuousDeviceSelect');
+                    continuousSelect.innerHTML = '<option value="">Gerät auswählen...</option>';
+                    
+                    data.devices.forEach(device => {
+                        const option = document.createElement('option');
+                        option.value = device.id;
+                        option.textContent = `${device.name} (${device.channels} Kanäle)`;
+                        select.appendChild(option);
+                        
+                        const continuousOption = document.createElement('option');
+                        continuousOption.value = device.id;
+                        continuousOption.textContent = `${device.name} (${device.channels} Kanäle)`;
+                        continuousSelect.appendChild(continuousOption);
+                    });
+                } catch (error) {
+                    console.error('Error loading devices:', error);
+                    document.getElementById('deviceSelect').innerHTML = '<option value="">Fehler beim Laden der Geräte</option>';
+                    document.getElementById('continuousDeviceSelect').innerHTML = '<option value="">Fehler beim Laden der Geräte</option>';
+                }
+            }
+        }
+        
+        async function startRecording() {
+            const deviceId = document.getElementById('deviceSelect').value;
+            const duration = document.getElementById('durationInput').value;
+            
+            if (!deviceId) {
+                alert('Bitte wählen Sie ein Audiogerät aus!');
+                return;
+            }
+            
+            if (USE_CLIENT_RECORDING) {
+                // Client-side recording
+                try {
+                    if (!audioRecorder) {
+                        audioRecorder = new AudioRecorder();
+                    }
+                    
+                    // Set up callback for when recording stops
+                    audioRecorder.onStop = async (blob) => {
+                        // Upload the recording to server
+                        const formData = new FormData();
+                        formData.append('audio', blob, 'recording.wav');
+                        
+                        try {
+                            const response = await fetch('/api/upload-recording', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('✅ Recording uploaded:', data);
+                                
+                                // Reload recordings list
+                                loadRecordings();
+                                
+                                const statusBadge = document.getElementById('statusBadge');
+                                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Aufnahme gespeichert';
+                                
+                                // Handle transcription
+                                if (data.transcription_started) {
+                                    console.log('🎯 Transcription started for:', data.filename);
+                                    
+                                    // Show transcription loading
+                                    document.getElementById('noTranscription').style.display = 'none';
+                                    document.getElementById('transcriptionContent').style.display = 'none';
+                                    document.getElementById('transcriptionLoading').style.display = 'block';
+                                    
+                                    // Start checking for transcription results
+                                    currentTranscriptionFile = data.filename;
+                                }
+                                
+                                setTimeout(() => {
+                                    statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Bereit';
+                                }, 3000);
+                            } else {
+                                throw new Error('Upload failed');
+                            }
+                        } catch (error) {
+                            console.error('Error uploading recording:', error);
+                            alert('Fehler beim Hochladen der Aufnahme!');
+                        }
+                    };
+                    
+                    // Start recording
+                    await audioRecorder.startRecording(deviceId, parseInt(duration));
+                    isRecording = true;
+                    updateUI();
+                    
+                    // Start countdown timer
+                    let timeLeft = parseInt(duration);
+                    recordingTimer = setInterval(() => {
+                        timeLeft--;
+                        const statusBadge = document.getElementById('statusBadge');
+                        statusBadge.innerHTML = `<i class="fas fa-circle recording-indicator"></i> Aufnahme läuft (${timeLeft}s)`;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(recordingTimer);
+                            recordingTimer = null;
+                        }
+                    }, 1000);
+                } catch (error) {
+                    console.error('Error starting client recording:', error);
+                    alert('Fehler beim Starten der Aufnahme: ' + error.message);
+                }
+            } else {
+                // Server-side recording (original)
+                try {
+                    const formData = new FormData();
+                    formData.append('device_id', deviceId);
+                    formData.append('duration', duration);
+                    
+                    const response = await fetch('/api/start-recording', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        isRecording = true;
+                        updateUI();
+                        
+                        // Start countdown timer
+                        let timeLeft = parseInt(duration);
+                        recordingTimer = setInterval(() => {
+                            timeLeft--;
+                            const statusBadge = document.getElementById('statusBadge');
+                            statusBadge.innerHTML = `<i class="fas fa-circle recording-indicator"></i> Aufnahme läuft (${timeLeft}s)`;
+                            
+                            if (timeLeft <= 0) {
+                                clearInterval(recordingTimer);
+                                stopRecording();
+                            }
+                        }, 1000);
+                    } else {
+                        const error = await response.json();
+                        alert('Fehler beim Starten der Aufnahme: ' + error.detail);
+                    }
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    alert('Fehler beim Starten der Aufnahme!');
+                }
+            }
+        }
+        
+        async function stopRecording() {
+            if (USE_CLIENT_RECORDING) {
+                // Client-side recording
+                try {
+                    if (!audioRecorder || !audioRecorder.getIsRecording()) {
+                        console.error('No active recording to stop');
+                        return;
+                    }
+                    
+                    // Stop the recording (this will trigger the onStop callback)
+                    audioRecorder.stopRecording();
+                    isRecording = false;
+                    updateUI();
+                    
+                    if (recordingTimer) {
+                        clearInterval(recordingTimer);
+                        recordingTimer = null;
+                    }
+                } catch (error) {
+                    console.error('Error stopping client recording:', error);
+                    alert('Fehler beim Stoppen der Aufnahme: ' + error.message);
+                }
+            } else {
+                // Server-side recording (original)
+                try {
+                    const response = await fetch('/api/stop-recording', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        isRecording = false;
+                        updateUI();
+                        
+                        if (recordingTimer) {
+                            clearInterval(recordingTimer);
+                            recordingTimer = null;
+                        }
+                        
+                        // Reload recordings list
+                        loadRecordings();
+                        
+                        const statusBadge = document.getElementById('statusBadge');
+                        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Aufnahme gespeichert';
+                        
+                        // Handle transcription
+                        if (data.transcription_started) {
+                            console.log('🎯 Transcription started for:', data.filename);
+                            
+                            // Show transcription loading
+                            document.getElementById('noTranscription').style.display = 'none';
+                            document.getElementById('transcriptionContent').style.display = 'none';
+                            document.getElementById('transcriptionLoading').style.display = 'block';
+                            
+                            // Start checking for transcription results
+                            currentTranscriptionFile = data.filename;
+                        } else {
+                            console.log('⚠️ Transcription not started - model not available');
+                        }
+                        
+                        setTimeout(() => {
+                            statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Bereit';
+                        }, 3000);
+                    } else {
+                        const error = await response.json();
+                        alert('Fehler beim Stoppen der Aufnahme: ' + error.detail);
+                    }
+                } catch (error) {
+                    console.error('Error stopping recording:', error);
+                    alert('Fehler beim Stoppen der Aufnahme!');
+                }
+            }
+        }
+        
+        let isContinuousRecording = false;
+        
+        async function checkRecordingStatus() {
+            if (USE_CLIENT_RECORDING) {
+                // Client-side status check
+                try {
+                    const response = await fetch('/api/client-recording-status');
+                    const status = await response.json();
+                    
+                    // Update queue size
+                    document.getElementById('queueSize').innerHTML = `<strong>${status.transcription_queue_size}</strong>`;
+                    
+                    // Update transcription status (using existing element)
+                    const transcriptionStatus = document.getElementById('transcriptionStatus');
+                    if (transcriptionStatus) {
+                        if (status.is_transcribing) {
+                            transcriptionStatus.innerHTML = `<span class="text-warning"><i class="fas fa-spinner fa-spin"></i> Transkribiert...</span>`;
+                        } else if (status.transcription_available) {
+                            transcriptionStatus.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Bereit</span>`;
+                        } else {
+                            transcriptionStatus.innerHTML = `<span class="text-secondary"><i class="fas fa-times"></i> Deaktiviert</span>`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking client recording status:', error);
+                }
+            } else {
+                // Server-side status check (original)
+                try {
+                    const response = await fetch('/api/recording-status');
+                    const status = await response.json();
+                    
+                    if (status.is_recording !== isRecording) {
+                        isRecording = status.is_recording;
+                        updateUI();
+                    }
+                    
+                    // Update continuous recording status
+                    if (status.continuous_recording !== isContinuousRecording) {
+                        isContinuousRecording = status.continuous_recording;
+                        updateContinuousUI();
+                    }
+                    
+                    // Update continuous stats
+                    if (status.continuous_recording && status.continuous_stats) {
+                        updateContinuousStats(status.continuous_stats);
+                    }
+                    
+                    // Update queue size
+                    document.getElementById('queueSize').innerHTML = `<strong>${status.transcription_queue_size}</strong>`;
+                    
+                    // Update transcription status (using existing element)
+                    const transcriptionStatus2 = document.getElementById('transcriptionStatus');
+                    if (transcriptionStatus2) {
+                        if (status.is_transcribing) {
+                            transcriptionStatus2.innerHTML = `<span class="text-warning"><i class="fas fa-spinner fa-spin"></i> Transkribiert...</span>`;
+                        } else if (status.transcription_available) {
+                            transcriptionStatus2.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Bereit</span>`;
+                        } else {
+                            transcriptionStatus2.innerHTML = `<span class="text-secondary"><i class="fas fa-times"></i> Deaktiviert</span>`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking recording status:', error);
+                }
+            }
+        }
+        
+        let currentTranscriptionFile = null;
+        let lastDisplayedSceneFile = null;
+        
+        async function checkTranscriptionStatus() {
+            if (!currentTranscriptionFile) return;
+            
+            try {
+                const response = await fetch(`/api/transcription/${currentTranscriptionFile}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    showTranscription(data);
+                    currentTranscriptionFile = null; // Stop checking
+                }
+            } catch (error) {
+                // Still transcribing or error - continue checking
+            }
+        }
+        
+        async function checkLatestSceneTranscription() {
+            // Only check during continuous recording
+            if (!isContinuousRecording) return;
+            
+            try {
+                const response = await fetch('/api/latest-scene-transcription');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Only show if it's a new scene (different from last displayed)
+                    if (data.filename !== lastDisplayedSceneFile) {
+                        lastDisplayedSceneFile = data.filename;
+                        
+                        // Show the transcription with scene info
+                        showSceneTranscription(data.transcription, data.scene_number, data.filename);
+                        
+                        // Reload transcripts list to show new file
+                        loadTranscripts();
+                        
+                        console.log(`🎭 New scene transcription displayed: Scene ${data.scene_number} (${data.filename})`);
+                    }
+                } else if (response.status === 202) {
+                    // Transcription not yet completed - this is normal
+                } else if (response.status === 404) {
+                    // No scenes available yet - this is normal at start
+                }
+            } catch (error) {
+                // Network error or similar - ignore silently during continuous recording
+            }
+        }
+        
+        function showTranscription(data) {
+            // Hide loading and no-transcription
+            document.getElementById('transcriptionLoading').style.display = 'none';
+            document.getElementById('noTranscription').style.display = 'none';
+            
+            // Show content
+            document.getElementById('transcriptionContent').style.display = 'block';
+            
+            // Populate data
+            document.getElementById('transcriptionFilename').textContent = data.filename;
+            
+            if (data.error) {
+                document.getElementById('transcriptionText').innerHTML = `<span class="text-danger">Fehler: ${data.error}</span>`;
+                return;
+            }
+            
+            document.getElementById('transcriptionLanguage').textContent = data.language || 'Unbekannt';
+            document.getElementById('transcriptionConfidence').textContent = Math.round((data.language_probability || 0) * 100);
+            document.getElementById('transcriptionDuration').textContent = data.duration || 0;
+            document.getElementById('transcriptionDevice').textContent = data.device || 'Unbekannt';
+            document.getElementById('transcriptionText').textContent = data.full_text || 'Kein Text erkannt';
+            
+            // Show segments
+            const segmentsContainer = document.getElementById('transcriptionSegments');
+            segmentsContainer.innerHTML = '';
+            
+            if (data.segments && data.segments.length > 0) {
+                data.segments.forEach((segment, index) => {
+                    const segmentDiv = document.createElement('div');
+                    segmentDiv.className = 'mb-2 p-2 border rounded';
+                    segmentDiv.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <strong>Segment ${index + 1}</strong>
+                            <small class="text-muted">${segment.start}s - ${segment.end}s</small>
+                        </div>
+                        <div>${segment.text}</div>
+                    `;
+                    segmentsContainer.appendChild(segmentDiv);
+                });
+            } else {
+                segmentsContainer.innerHTML = '<div class="text-muted">Keine Segmente verfügbar</div>';
+            }
+            
+            console.log('📝 Transcription loaded:', data);
+        }
+        
+        function showSceneTranscription(data, sceneNumber, filename) {
+            // Hide loading and no-transcription
+            document.getElementById('transcriptionLoading').style.display = 'none';
+            document.getElementById('noTranscription').style.display = 'none';
+            
+            // Show content
+            document.getElementById('transcriptionContent').style.display = 'block';
+            
+            // Populate data with scene info
+            document.getElementById('transcriptionFilename').innerHTML = `
+                <span class="text-primary">Szene ${sceneNumber}:</span> ${filename}
+            `;
+            
+            if (data.error) {
+                document.getElementById('transcriptionText').innerHTML = `<span class="text-danger">Fehler: ${data.error}</span>`;
+                return;
+            }
+            
+            document.getElementById('transcriptionLanguage').textContent = data.language || 'Unbekannt';
+            document.getElementById('transcriptionConfidence').textContent = Math.round((data.language_probability || 0) * 100);
+            document.getElementById('transcriptionDuration').textContent = data.duration || 0;
+            document.getElementById('transcriptionDevice').textContent = data.device || 'Unbekannt';
+            document.getElementById('transcriptionText').textContent = data.full_text || 'Kein Text erkannt';
+            
+            // Show segments
+            const segmentsContainer = document.getElementById('transcriptionSegments');
+            segmentsContainer.innerHTML = '';
+            
+            if (data.segments && data.segments.length > 0) {
+                data.segments.forEach((segment, index) => {
+                    const segmentDiv = document.createElement('div');
+                    segmentDiv.className = 'mb-2 p-2 border rounded';
+                    segmentDiv.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <strong>Segment ${index + 1}</strong>
+                            <small class="text-muted">${segment.start}s - ${segment.end}s</small>
+                        </div>
+                        <div>${segment.text}</div>
+                    `;
+                    segmentsContainer.appendChild(segmentDiv);
+                });
+            } else {
+                segmentsContainer.innerHTML = '<div class="text-muted">Keine Segmente verfügbar</div>';
+            }
+            
+            console.log('🎭 Scene transcription loaded:', data);
+        }
+        
+        function copyTranscriptionText() {
+            const text = document.getElementById('transcriptionText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Text in die Zwischenablage kopiert!');
+            }).catch(err => {
+                console.error('Error copying text:', err);
+                alert('Fehler beim Kopieren des Textes!');
+            });
+        }
+        
+        // Continuous Scene Recording Functions
+        async function startContinuousRecording() {
+            const deviceId = document.getElementById('continuousDeviceSelect').value;
+            const sceneDuration = parseFloat(document.getElementById('sceneDurationInput').value);
+            
+            if (!deviceId) {
+                alert('Bitte wählen Sie ein Audiogerät für Szenen-Aufnahme aus!');
+                return;
+            }
+            
+            if (sceneDuration < 0.5 || sceneDuration > 10) {
+                alert('Szenen-Dauer muss zwischen 0.5 und 10 Minuten liegen!');
+                return;
+            }
+            
+            if (USE_CLIENT_RECORDING) {
+                // Client-side continuous recording
+                try {
+                    if (!continuousRecorder) {
+                        continuousRecorder = new ContinuousRecorder();
+                    }
+                    
+                    // Set up callback for each completed scene
+                    continuousRecorder.onSceneComplete = async (blob, filename, sceneNumber) => {
+                        console.log(`🎭 Scene ${sceneNumber} completed: ${filename}, blob size: ${blob.size} bytes`);
+                        
+                        // Upload scene to server
+                        const formData = new FormData();
+                        formData.append('audio', blob, filename);
+                        formData.append('scene_number', sceneNumber);
+                        formData.append('timestamp', filename.split('_')[1].split('.')[0]);
+                        
+                        console.log(`📤 Uploading scene ${sceneNumber} to server...`);
+                        
+                        try {
+                            const response = await fetch('/api/upload-scene', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            
+                            console.log(`📡 Upload response status: ${response.status}`);
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('✅ Scene uploaded successfully:', data);
+                                
+                                // Update stats display
+                                const stats = continuousRecorder.getStats();
+                                updateContinuousStats({
+                                    total_scenes: stats.totalScenes,
+                                    total_duration: stats.totalDuration,
+                                    start_time: stats.startTime
+                                });
+                                
+                                // Reload recordings list
+                                loadRecordings();
+                            } else {
+                                const errorText = await response.text();
+                                console.error(`❌ Upload failed with status ${response.status}:`, errorText);
+                            }
+                        } catch (error) {
+                            console.error('❌ Error uploading scene:', error);
+                            console.error('Full error details:', error.stack);
+                        }
+                    };
+                    
+                    // Start continuous recording
+                    await continuousRecorder.start(deviceId, sceneDuration);
+                    isContinuousRecording = true;
+                    
+                    // Update duration display and timer
+                    document.getElementById('currentSceneDuration').innerHTML = `<strong>${sceneDuration} Min</strong>`;
+                    sceneDurationSeconds = sceneDuration * 60;
+                    sceneStartTime = Date.now();
+                    
+                    updateContinuousUI();
+                } catch (error) {
+                    console.error('Error starting client continuous recording:', error);
+                    alert('Fehler beim Starten der Szenen-Aufnahme: ' + error.message);
+                }
+            } else {
+                // Server-side continuous recording (original)
+                try {
+                    const formData = new FormData();
+                    formData.append('device_id', deviceId);
+                    formData.append('scene_duration_minutes', sceneDuration);
+                    
+                    const response = await fetch('/api/start-continuous-recording', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('🎭 Continuous scene recording started:', data);
+                        isContinuousRecording = true;
+                        
+                        // Update duration display
+                        document.getElementById('currentSceneDuration').innerHTML = `<strong>${sceneDuration} Min</strong>`;
+                        
+                        updateContinuousUI();
+                    } else {
+                        const error = await response.json();
+                        alert('Fehler beim Starten der Szenen-Aufnahme: ' + error.detail);
+                    }
+                } catch (error) {
+                    console.error('Error starting continuous scene recording:', error);
+                    alert('Fehler beim Starten der Szenen-Aufnahme!');
+                }
+            }
+        }
+        
+        async function stopContinuousRecording() {
+            console.log('🛑 Attempting to stop continuous recording...');
+            
+            if (USE_CLIENT_RECORDING) {
+                // Client-side continuous recording
+                try {
+                    console.log('🔍 Checking continuousRecorder instance:', !!continuousRecorder);
+                    
+                    // Force stop recording regardless of state
+                    isContinuousRecording = false;
+                    lastDisplayedSceneFile = null; // Reset scene tracking
+                    sceneStartTime = null; // Stop timer
+                    
+                    // Stop the recorder if it exists
+                    if (continuousRecorder) {
+                        try {
+                            const currentStats = continuousRecorder.getStats();
+                            console.log('📊 Current recorder state:', currentStats);
+                            
+                            // Always use forceStop for more reliable stopping
+                            const stats = continuousRecorder.forceStop();
+                            console.log('✅ Recorder force-stopped successfully:', stats);
+                            
+                        } catch (recorderError) {
+                            console.error('⚠️ Error stopping recorder (continuing anyway):', recorderError);
+                            // Force reset by nulling instance
+                            continuousRecorder = null;
+                        }
+                    } else {
+                        console.log('ℹ️ No recorder instance to stop');
+                    }
+                    
+                    // Update UI regardless of recorder state
+                    updateContinuousUI();
+                    
+                    // Safely hide transcription panel
+                    safeHideTranscriptionPanel();
+                    
+                    console.log('✅ Continuous recording stop completed');
+                    
+                } catch (error) {
+                    console.error('❌ Error in stop process:', error);
+                    
+                    // Use emergency reset for critical errors
+                    console.log('🚨 Triggering emergency reset due to stop error');
+                    emergencyResetContinuousRecording();
+                }
+            } else {
+                // Server-side continuous recording (original)
+                try {
+                    const response = await fetch('/api/stop-continuous-recording', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('🛑 Server continuous recording stopped:', data);
+                    } else {
+                        const error = await response.json();
+                        console.warn('⚠️ Server stop error:', error.detail);
+                    }
+                } catch (serverError) {
+                    console.error('❌ Server stop error:', serverError);
+                }
+                
+                // Always reset client state
+                isContinuousRecording = false;
+                lastDisplayedSceneFile = null;
+                updateContinuousUI();
+                safeHideTranscriptionPanel();
+            }
+        }
+        
+        function safeHideTranscriptionPanel() {
+            try {
+                const transcriptionContent = document.getElementById('transcriptionContent');
+                const transcriptionLoading = document.getElementById('transcriptionLoading');
+                const noTranscription = document.getElementById('noTranscription');
+                
+                if (transcriptionContent) {
+                    transcriptionContent.style.display = 'none';
+                }
+                if (transcriptionLoading) {
+                    transcriptionLoading.style.display = 'none';
+                }
+                if (noTranscription) {
+                    noTranscription.style.display = 'block';
+                }
+            } catch (error) {
+                console.warn('⚠️ Error hiding transcription panel (non-critical):', error);
+            }
+        }
+        
+        // Emergency reset function for critical errors
+        function emergencyResetContinuousRecording() {
+            console.log('🚨 Emergency reset of continuous recording system...');
+            
+            try {
+                // Force reset all state
+                isContinuousRecording = false;
+                lastDisplayedSceneFile = null;
+                sceneStartTime = null;
+                
+                // Force stop any recorder
+                if (continuousRecorder) {
+                    try {
+                        continuousRecorder.forceStop();
+                    } catch (error) {
+                        console.error('Error during emergency recorder stop:', error);
+                    }
+                    continuousRecorder = null;
+                }
+                
+                // Reset UI elements
+                try {
+                    updateContinuousUI();
+                } catch (error) {
+                    console.error('Error updating UI during emergency reset:', error);
+                    // Manual UI reset
+                    const startBtn = document.getElementById('startContinuousBtn');
+                    const stopBtn = document.getElementById('stopContinuousBtn');
+                    const statusBadge = document.getElementById('continuousStatusBadge');
+                    const statsDiv = document.getElementById('continuousStats');
+                    
+                    if (startBtn) startBtn.disabled = false;
+                    if (stopBtn) stopBtn.disabled = true;
+                    if (statusBadge) {
+                        statusBadge.className = 'badge bg-secondary ms-2';
+                        statusBadge.innerHTML = 'Bereit';
+                    }
+                    if (statsDiv) statsDiv.style.display = 'none';
+                }
+                
+                // Hide transcription panel
+                safeHideTranscriptionPanel();
+                
+                console.log('✅ Emergency reset completed');
+                alert('System wurde zurückgesetzt. Aktuelle Szene wurde abgebrochen.');
+                
+            } catch (error) {
+                console.error('❌ Critical error during emergency reset:', error);
+                alert('Kritischer Fehler beim Zurücksetzen. Bitte Seite neu laden.');
+            }
+        }
+        
+        function updateContinuousUI() {
+            try {
+                console.log('🔄 Updating continuous UI, recording state:', isContinuousRecording);
+                
+                const startBtn = document.getElementById('startContinuousBtn');
+                const stopBtn = document.getElementById('stopContinuousBtn');
+                const statusBadge = document.getElementById('continuousStatusBadge');
+                const statsDiv = document.getElementById('continuousStats');
+                
+                // Check if elements exist before updating
+                if (!startBtn || !stopBtn || !statusBadge || !statsDiv) {
+                    console.warn('⚠️ Some UI elements not found:', {
+                        startBtn: !!startBtn,
+                        stopBtn: !!stopBtn,
+                        statusBadge: !!statusBadge,
+                        statsDiv: !!statsDiv
+                    });
+                }
+                
+                if (isContinuousRecording) {
+                    if (startBtn) startBtn.disabled = true;
+                    if (stopBtn) stopBtn.disabled = false;
+                    if (statusBadge) {
+                        statusBadge.className = 'badge bg-success ms-2';
+                        statusBadge.innerHTML = '<i class="fas fa-circle recording-indicator"></i> Läuft';
+                    }
+                    if (statsDiv) statsDiv.style.display = 'block';
+                } else {
+                    if (startBtn) startBtn.disabled = false;
+                    if (stopBtn) stopBtn.disabled = true;
+                    if (statusBadge) {
+                        statusBadge.className = 'badge bg-secondary ms-2';
+                        statusBadge.innerHTML = 'Bereit';
+                    }
+                    if (statsDiv) statsDiv.style.display = 'none';
+                }
+                
+                console.log('✅ Continuous UI updated successfully');
+                
+            } catch (error) {
+                console.error('❌ Error updating continuous UI:', error);
+                // Don't throw - this should not prevent other operations
+            }
+        }
+        
+        function updateContinuousStats(stats) {
+            try {
+                if (!stats) {
+                    console.log('ℹ️ No stats provided to updateContinuousStats');
+                    return;
+                }
+                
+                console.log('📊 Updating continuous stats:', stats);
+                
+                const totalScenesEl = document.getElementById('totalScenes');
+                const totalDurationEl = document.getElementById('totalDuration');
+                const startTimeEl = document.getElementById('startTime');
+                
+                if (totalScenesEl) {
+                    totalScenesEl.textContent = stats.total_scenes || 0;
+                } else {
+                    console.warn('⚠️ totalScenes element not found');
+                }
+                
+                if (totalDurationEl) {
+                    totalDurationEl.textContent = Math.round((stats.total_duration || 0) / 60) + ' min';
+                } else {
+                    console.warn('⚠️ totalDuration element not found');
+                }
+                
+                if (stats.start_time) {
+                    if (startTimeEl) {
+                        const startTime = new Date(stats.start_time).toLocaleTimeString('de-DE');
+                        startTimeEl.textContent = startTime;
+                    } else {
+                        console.warn('⚠️ startTime element not found');
+                    }
+                }
+                
+                console.log('✅ Continuous stats updated successfully');
+                
+            } catch (error) {
+                console.error('❌ Error updating continuous stats:', error);
+                // Don't throw - this should not prevent other operations
+            }
+        }
+        
+        function updateUI() {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            if (isRecording) {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                statusBadge.className = 'status-badge status-recording';
+                statusBadge.innerHTML = '<i class="fas fa-circle recording-indicator"></i> Aufnahme läuft...';
+            } else {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                statusBadge.className = 'status-badge status-ready';
+                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Bereit';
+            }
+        }
+        
+        async function loadRecordings() {
+            try {
+                const response = await fetch('/api/recordings');
+                const data = await response.json();
+                
+                const container = document.getElementById('recordingsList');
+                
+                if (data.recordings.length === 0) {
+                    container.innerHTML = '<p class="text-center text-muted">Keine Aufnahmen vorhanden</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                data.recordings.forEach(recording => {
+                    const item = document.createElement('div');
+                    item.className = 'recording-item';
+                    
+                    const date = new Date(recording.created).toLocaleString('de-DE');
+                    const sizeKB = Math.round(recording.size / 1024);
+                    
+                    const recordingId = recording.filename.replace(/[^a-zA-Z0-9]/g, '_');
+                    
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${recording.filename}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> ${date} | 
+                                    <i class="fas fa-file"></i> ${sizeKB} KB
+                                </small>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-primary btn-sm play-btn" id="playBtn_${recordingId}" onclick="togglePlayback('${recording.filename}', '${recordingId}')">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteRecording('${recording.filename}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Audio Player -->
+                        <div class="audio-player" id="player_${recordingId}">
+                            <audio id="audio_${recordingId}" src="/api/play/${recording.filename}" preload="metadata"></audio>
+                            <div class="audio-progress" id="progress_${recordingId}" onclick="seekAudio(event, '${recordingId}')">
+                                <div class="audio-progress-bar" id="progressBar_${recordingId}"></div>
+                                <div class="audio-progress-handle" id="progressHandle_${recordingId}" style="left: 0%"></div>
+                            </div>
+                            <div class="audio-time">
+                                <span id="currentTime_${recordingId}">0:00</span>
+                                <span id="duration_${recordingId}">0:00</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading recordings:', error);
+                document.getElementById('recordingsList').innerHTML = '<p class="text-center text-danger">Fehler beim Laden der Aufnahmen</p>';
+            }
+        }
+        
+        // Audio Player Functions
+        let currentlyPlaying = null;
+        let progressInterval = null;
+        
+        function togglePlayback(filename, recordingId) {
+            const audio = document.getElementById(`audio_${recordingId}`);
+            const playBtn = document.getElementById(`playBtn_${recordingId}`);
+            const player = document.getElementById(`player_${recordingId}`);
+            
+            // Stop any other playing audio
+            if (currentlyPlaying && currentlyPlaying !== audio) {
+                stopAudio(currentlyPlaying.id.replace('audio_', ''));
+            }
+            
+            if (audio.paused) {
+                // Play
+                audio.play().then(() => {
+                    currentlyPlaying = audio;
+                    playBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    player.classList.add('active');
+                    
+                    // Update duration when metadata is loaded
+                    audio.addEventListener('loadedmetadata', () => {
+                        document.getElementById(`duration_${recordingId}`).textContent = formatTime(audio.duration);
+                    });
+                    
+                    // Start progress update
+                    updateProgress(recordingId);
+                    
+                    // Handle audio end
+                    audio.addEventListener('ended', () => {
+                        stopAudio(recordingId);
+                    });
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    alert('Fehler beim Abspielen der Audiodatei!');
+                });
+            } else {
+                // Stop
+                stopAudio(recordingId);
+            }
+        }
+        
+        function stopAudio(recordingId) {
+            const audio = document.getElementById(`audio_${recordingId}`);
+            const playBtn = document.getElementById(`playBtn_${recordingId}`);
+            const player = document.getElementById(`player_${recordingId}`);
+            
+            audio.pause();
+            audio.currentTime = 0;
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            player.classList.remove('active');
+            
+            // Clear progress interval
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            
+            // Reset progress bar
+            document.getElementById(`progressBar_${recordingId}`).style.width = '0%';
+            document.getElementById(`progressHandle_${recordingId}`).style.left = '0%';
+            document.getElementById(`currentTime_${recordingId}`).textContent = '0:00';
+            
+            if (currentlyPlaying === audio) {
+                currentlyPlaying = null;
+            }
+        }
+        
+        function updateProgress(recordingId) {
+            const audio = document.getElementById(`audio_${recordingId}`);
+            const progressBar = document.getElementById(`progressBar_${recordingId}`);
+            const progressHandle = document.getElementById(`progressHandle_${recordingId}`);
+            const currentTimeEl = document.getElementById(`currentTime_${recordingId}`);
+            
+            // Clear any existing interval
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            
+            progressInterval = setInterval(() => {
+                if (audio.duration) {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = percent + '%';
+                    progressHandle.style.left = percent + '%';
+                    currentTimeEl.textContent = formatTime(audio.currentTime);
+                }
+            }, 100);
+        }
+        
+        function seekAudio(event, recordingId) {
+            const audio = document.getElementById(`audio_${recordingId}`);
+            const progress = document.getElementById(`progress_${recordingId}`);
+            
+            if (!audio.duration) return;
+            
+            const rect = progress.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percent = (clickX / rect.width) * 100;
+            const newTime = (percent / 100) * audio.duration;
+            
+            audio.currentTime = newTime;
+            
+            // Update progress immediately
+            document.getElementById(`progressBar_${recordingId}`).style.width = percent + '%';
+            document.getElementById(`progressHandle_${recordingId}`).style.left = percent + '%';
+            document.getElementById(`currentTime_${recordingId}`).textContent = formatTime(newTime);
+        }
+        
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        async function deleteRecording(filename) {
+            if (confirm(`Möchten Sie die Aufnahme "${filename}" wirklich löschen?`)) {
+                try {
+                    const response = await fetch(`/api/recordings/${filename}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        loadRecordings();
+                    } else {
+                        const error = await response.json();
+                        alert('Fehler beim Löschen: ' + error.detail);
+                    }
+                } catch (error) {
+                    console.error('Error deleting recording:', error);
+                    alert('Fehler beim Löschen der Aufnahme!');
+                }
+            }
+        }
+        
+        // Transcript Functions
+        async function loadTranscripts() {
+            try {
+                const response = await fetch('/api/transcripts');
+                const data = await response.json();
+                
+                const container = document.getElementById('transcriptsList');
+                
+                if (data.transcripts.length === 0) {
+                    container.innerHTML = '<p class="text-center text-muted">Keine Transkripte vorhanden</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                data.transcripts.forEach(transcript => {
+                    const item = document.createElement('div');
+                    item.className = 'transcript-item p-3 mb-2 border rounded cursor-pointer';
+                    item.style.cursor = 'pointer';
+                    item.style.transition = 'background-color 0.2s';
+                    
+                    const created = new Date(transcript.created).toLocaleString('de-DE');
+                    const modified = new Date(transcript.modified).toLocaleString('de-DE');
+                    const sizeKB = Math.round(transcript.size / 1024);
+                    
+                    // Determine transcript type based on filename
+                    let typeIcon = '<i class="fas fa-file-text text-primary"></i>';
+                    let typeName = 'Einzelaufnahme';
+                    if (transcript.filename.includes('scene_')) {
+                        typeIcon = '<i class="fas fa-theater-masks text-success"></i>';
+                        typeName = 'Szene';
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    ${typeIcon} ${transcript.filename}
+                                </h6>
+                                <small class="text-muted">
+                                    <span class="badge bg-secondary me-2">${typeName}</span>
+                                    <i class="fas fa-calendar"></i> ${created} | 
+                                    <i class="fas fa-edit"></i> ${modified} | 
+                                    <i class="fas fa-file"></i> ${sizeKB} KB
+                                </small>
+                            </div>
+                            <div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add hover effects
+                    item.addEventListener('mouseenter', function() {
+                        this.style.background = 'linear-gradient(145deg, #2c1810 0%, #3d2817 100%)';
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                        this.style.background = 'linear-gradient(145deg, #1a0f0a 0%, #2c1810 100%)';
+                    });
+                    
+                    // Add click handler
+                    item.addEventListener('click', function() {
+                        viewTranscript(transcript.filename);
+                    });
+                    
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading transcripts:', error);
+                document.getElementById('transcriptsList').innerHTML = '<p class="text-center text-danger">Fehler beim Laden der Transkripte</p>';
+            }
+        }
+        
+        async function viewTranscript(filename) {
+            try {
+                const response = await fetch(`/api/transcript/${filename}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Show viewer section
+                    document.getElementById('transcriptViewerSection').style.display = 'block';
+                    
+                    // Populate viewer
+                    document.getElementById('viewerFilename').textContent = filename;
+                    document.getElementById('transcriptContent').textContent = data.content;
+                    
+                    // Scroll to viewer
+                    document.getElementById('transcriptViewerSection').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    console.log('📄 Transcript loaded:', filename);
+                } else {
+                    const error = await response.json();
+                    alert('Fehler beim Laden des Transkripts: ' + error.detail);
+                }
+            } catch (error) {
+                console.error('Error viewing transcript:', error);
+                alert('Fehler beim Anzeigen des Transkripts!');
+            }
+        }
+        
+        function closeTranscriptViewer() {
+            document.getElementById('transcriptViewerSection').style.display = 'none';
+        }
+        
+        function copyTranscriptContent() {
+            const content = document.getElementById('transcriptContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Transkript-Inhalt in die Zwischenablage kopiert!');
+            }).catch(err => {
+                console.error('Error copying transcript content:', err);
+                alert('Fehler beim Kopieren des Transkript-Inhalts!');
+            });
+        }
+        
+        // ============= CINEMA MODE FUNCTIONS =============
+        
+        function enterCinemaMode() {
+            console.log('🎬 Entering Cinema Mode...');
+            
+            // Check if we have a current scene to show
+            const sceneImage = document.getElementById('sceneImage');
+            if (!sceneImage.src) {
+                alert('Keine Szene verfügbar für Cinema-Modus');
+                return;
+            }
+            
+            isCinemaMode = true;
+            
+            // Set cinema mode content - only image, no text overlays
+            document.getElementById('cinemaImage').src = sceneImage.src;
+            
+            // Show cinema overlay
+            const overlay = document.getElementById('cinemaOverlay');
+            overlay.classList.add('active');
+            
+            // Track current scene for updates (get name from DOM)
+            cinemaCurrentScene = document.getElementById('sceneName').textContent;
+            
+            // Start cinema-specific updates (every 5 seconds)
+            cinemaUpdateInterval = setInterval(checkForNewScenesInCinema, 5000);
+            
+            // Auto-hide cursor after 3 seconds of inactivity
+            resetCinemaCursorTimeout();
+            
+            console.log('🎬 Cinema Mode activated for scene:', cinemaCurrentScene);
+        }
+        
+        function exitCinemaMode() {
+            console.log('🎬 Exiting Cinema Mode...');
+            
+            isCinemaMode = false;
+            cinemaCurrentScene = null;
+            
+            // Hide cinema overlay
+            const overlay = document.getElementById('cinemaOverlay');
+            overlay.classList.remove('active');
+            
+            // Clear intervals and timeouts
+            if (cinemaUpdateInterval) {
+                clearInterval(cinemaUpdateInterval);
+                cinemaUpdateInterval = null;
+            }
+            
+            if (cinemaCursorTimeout) {
+                clearTimeout(cinemaCursorTimeout);
+                cinemaCursorTimeout = null;
+            }
+            
+            // Show cursor again
+            overlay.classList.remove('hide-cursor');
+            
+            console.log('🎬 Cinema Mode deactivated');
+        }
+        
+        function resetCinemaCursorTimeout() {
+            const overlay = document.getElementById('cinemaOverlay');
+            
+            // Clear existing timeout
+            if (cinemaCursorTimeout) {
+                clearTimeout(cinemaCursorTimeout);
+            }
+            
+            // Show cursor
+            overlay.classList.remove('hide-cursor');
+            
+            // Hide cursor after 3 seconds of inactivity
+            cinemaCursorTimeout = setTimeout(() => {
+                overlay.classList.add('hide-cursor');
+            }, 3000);
+        }
+        
+        async function checkForNewScenesInCinema() {
+            if (!isCinemaMode) {
+                return;
+            }
+            
+            try {
+                console.log('🎬 Checking for new scenes in cinema mode...');
+                
+                const response = await fetch('/api/latest-scene');
+                if (response.ok) {
+                    const data = await response.json();
+                    const latestSceneName = data.scene_name;
+                    
+                    // Check if there's a new scene
+                    if (latestSceneName !== cinemaCurrentScene) {
+                        console.log('🎬 New scene detected in cinema mode:', latestSceneName);
+                        await updateCinemaScene(data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for new scenes in cinema mode:', error);
+            }
+        }
+        
+        async function updateCinemaScene(sceneData) {
+            console.log('🎬 Updating cinema scene with smooth transition...');
+            
+            const cinemaImage = document.getElementById('cinemaImage');
+            
+            // Start fade out
+            cinemaImage.classList.add('fade-out');
+            
+            // Wait for fade out to complete, then update content
+            setTimeout(() => {
+                // Update image source only - no text overlays
+                cinemaImage.src = sceneData.metadata.image_url;
+                
+                // Update tracking
+                cinemaCurrentScene = sceneData.scene_name;
+                
+                // Start fade in
+                cinemaImage.classList.remove('fade-out');
+                cinemaImage.classList.add('fade-in');
+                
+                console.log('🎬 Cinema scene updated to:', sceneData.scene_name);
+            }, 1000); // Wait for fade-out transition
+        }
+        
+        // ============= SCENE DISPLAY FUNCTIONS =============
+        
+        let currentSceneName = null;
+        let scenePollingInterval = null;
+        let isViewingHistoricalScene = false;  // Flag to prevent auto-updates when viewing historical scenes
+        let lastKnownSceneCount = 0;  // Track scene count to detect changes
+        let lastKnownLatestScene = null;  // Track latest scene to avoid unnecessary updates
+        
+        // Cinema Mode variables
+        let isCinemaMode = false;
+        let cinemaCurrentScene = null;
+        let cinemaCursorTimeout = null;
+        let cinemaUpdateInterval = null;
+        
+        // Start scene polling on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎭 Initializing scene display system');
+            
+            // Check for scenes every 5 seconds
+            checkForNewScenes();
+            scenePollingInterval = setInterval(checkForNewScenes, 5000);
+            
+            // Load scene history
+            loadSceneHistory();
+            
+            // Setup cinema mode event listeners
+            setupCinemaEventListeners();
+        });
+        
+        function setupCinemaEventListeners() {
+            // ESC key to exit cinema mode
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && isCinemaMode) {
+                    exitCinemaMode();
+                }
+            });
+            
+            // Click on cinema overlay to exit (but not on controls)
+            document.getElementById('cinemaOverlay').addEventListener('click', function(event) {
+                // Only exit if clicking the overlay itself, not controls or image
+                if (event.target === this) {
+                    exitCinemaMode();
+                }
+            });
+            
+            // Mouse movement to show cursor in cinema mode
+            document.getElementById('cinemaOverlay').addEventListener('mousemove', function() {
+                if (isCinemaMode) {
+                    resetCinemaCursorTimeout();
+                }
+            });
+            
+            // Prevent context menu in cinema mode
+            document.getElementById('cinemaOverlay').addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            });
+        }
+        
+        async function refreshScene() {
+            console.log('🔄 Manually refreshing scene...');
+            // Reset historical scene flag when manually refreshing
+            isViewingHistoricalScene = false;
+            document.getElementById('returnToLatestBtn').style.display = 'none';
+            await loadLatestScene();
+            await loadSceneHistory();
+        }
+        
+        async function returnToLatestScene() {
+            console.log('🔄 Returning to latest scene...');
+            // Reset historical scene flag
+            isViewingHistoricalScene = false;
+            document.getElementById('returnToLatestBtn').style.display = 'none';
+            await loadLatestScene();
+        }
+        
+        async function checkForNewScenes() {
+            try {
+                // Don't update if user is viewing a historical scene
+                if (isViewingHistoricalScene) {
+                    console.log('🔍 DEBUG: Skipping update - user viewing historical scene');
+                    return;
+                }
+
+                const response = await fetch('/api/scene-status');
+                if (response.ok) {
+                    const status = await response.json();
+                    
+                    // Update queue size display
+                    const queueSizeEl = document.getElementById('queueSize');
+                    if (queueSizeEl) {
+                        queueSizeEl.innerHTML = `<strong>${status.transcription_queue_size}</strong>`;
+                    }
+                    
+                    // Check for changes in scene count or latest scene
+                    const currentSceneCount = status.complete_scenes || 0;
+                    const currentLatestScene = status.latest_scene;
+                    
+                    // Only update if there are actual changes
+                    if (currentSceneCount !== lastKnownSceneCount || 
+                        currentLatestScene !== lastKnownLatestScene) {
+                        
+                        console.log('🎭 Scene changes detected:');
+                        console.log('   - Scene count:', lastKnownSceneCount, '→', currentSceneCount);
+                        console.log('   - Latest scene:', lastKnownLatestScene, '→', currentLatestScene);
+                        
+                        // Update tracking variables
+                        lastKnownSceneCount = currentSceneCount;
+                        lastKnownLatestScene = currentLatestScene;
+                        
+                        // Only update if we have a latest scene with image and it's different from current
+                        if (status.latest_has_image && currentLatestScene !== currentSceneName) {
+                            console.log('🎭 Loading new scene:', currentLatestScene);
+                            await loadLatestSceneQuiet();  // Silent update
+                        }
+                        
+                        // Always update history when scene count changes
+                        await loadSceneHistoryQuiet();  // Silent update
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for new scenes:', error);
+            }
+        }
+        
+        async function loadLatestScene() {
+            try {
+                console.log('🔍 DEBUG: Loading latest scene...');
+                
+                // Show loading state
+                document.getElementById('sceneLoading').style.display = 'block';
+                document.getElementById('sceneContent').style.display = 'none';
+                document.getElementById('sceneError').style.display = 'none';
+                
+                // Reset historical scene flag - user explicitly requested latest
+                isViewingHistoricalScene = false;
+                
+                const response = await fetch('/api/latest-scene');
+                console.log('🔍 DEBUG: Latest scene response status:', response.status);
+                
+                if (response.status === 404) {
+                    console.log('🔍 DEBUG: No scenes available (404)');
+                    // No scenes available
+                    document.getElementById('sceneStatusBadge').className = 'badge bg-secondary ms-2';
+                    document.getElementById('sceneStatusBadge').textContent = 'Keine Szenen vorhanden';
+                    
+                    // Hide cinema button (no scene to show)
+                    document.getElementById('cinemaBtn').style.display = 'none';
+                    return;
+                }
+                
+                if (response.status === 202) {
+                    console.log('🔍 DEBUG: Scene generation in progress (202)');
+                    // Scene generation in progress
+                    document.getElementById('sceneStatusBadge').className = 'badge badge-scene-processing ms-2';
+                    document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bild wird generiert...';
+                    
+                    // Hide cinema button (no scene ready yet)
+                    document.getElementById('cinemaBtn').style.display = 'none';
+                    return;
+                }
+                
+                if (response.ok) {
+                    console.log('✅ DEBUG: Latest scene response ok, parsing JSON...');
+                    const data = await response.json();
+                    console.log('🔍 DEBUG: Latest scene data:', data);
+                    
+                    currentSceneName = data.scene_name;
+                    
+                    // Display the scene
+                    console.log('🔍 DEBUG: Calling displayScene for latest scene...');
+                    displayScene(data);
+                    
+                    // Update status - show historical scene indicator
+                    document.getElementById('sceneStatusBadge').className = 'badge bg-info ms-2';
+                    document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-history"></i> Historische Szene';
+                    
+                    // Show "return to latest" button
+                    document.getElementById('returnToLatestBtn').style.display = 'inline-block';
+                    
+                    // Show cinema button (historical scene is still viewable)
+                    document.getElementById('cinemaBtn').style.display = 'block';
+                    
+                    // Hide loading, show content
+                    document.getElementById('sceneLoading').style.display = 'none';
+                    document.getElementById('sceneContent').style.display = 'block';
+                } else {
+                    console.log('❌ DEBUG: Latest scene response not ok, status:', response.status);
+                    const errorText = await response.text();
+                    console.log('❌ DEBUG: Latest scene error response:', errorText);
+                    throw new Error(`Failed to load scene (Status: ${response.status})`);
+                }
+            } catch (error) {
+                console.error('❌ DEBUG: Error loading latest scene:', error);
+                console.error('❌ DEBUG: Error stack:', error.stack);
+                
+                // Show error state
+                document.getElementById('sceneLoading').style.display = 'none';
+                document.getElementById('sceneContent').style.display = 'none';
+                document.getElementById('sceneError').style.display = 'block';
+                document.getElementById('sceneErrorMessage').textContent = 'Fehler beim Laden der Szene: ' + error.message;
+                
+                document.getElementById('sceneStatusBadge').className = 'badge bg-danger ms-2';
+                document.getElementById('sceneStatusBadge').textContent = 'Fehler';
+                
+                // Hide cinema button on error
+                document.getElementById('cinemaBtn').style.display = 'none';
+            }
+        }
+        
+        // Silent version of loadLatestScene that doesn't show loading indicators
+        async function loadLatestSceneQuiet() {
+            try {
+                console.log('🔍 DEBUG: Quietly loading latest scene...');
+                
+                const response = await fetch('/api/latest-scene');
+                
+                if (response.status === 404) {
+                    console.log('🔍 DEBUG: No scenes available (404)');
+                    document.getElementById('sceneStatusBadge').className = 'badge bg-secondary ms-2';
+                    document.getElementById('sceneStatusBadge').textContent = 'Keine Szenen vorhanden';
+                    document.getElementById('cinemaBtn').style.display = 'none';
+                    return;
+                }
+                
+                if (response.status === 202) {
+                    console.log('🔍 DEBUG: Scene generation in progress (202)');
+                    document.getElementById('sceneStatusBadge').className = 'badge badge-scene-processing ms-2';
+                    document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bild wird generiert...';
+                    document.getElementById('cinemaBtn').style.display = 'none';
+                    return;
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🔍 DEBUG: Quietly loaded latest scene:', data.scene_name);
+                    
+                    // Only update if scene content is currently visible (not loading/error state)
+                    const contentVisible = document.getElementById('sceneContent').style.display !== 'none';
+                    
+                    if (contentVisible) {
+                        currentSceneName = data.scene_name;
+                        displayScene(data);
+                        
+                        // Update status quietly
+                        document.getElementById('sceneStatusBadge').className = 'badge badge-scene-complete ms-2';
+                        document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Szene geladen';
+                        
+                        // Hide "return to latest" button (not needed for current scene)
+                        document.getElementById('returnToLatestBtn').style.display = 'none';
+                        
+                        // Show cinema button (scene is available)
+                        document.getElementById('cinemaBtn').style.display = 'block';
+                        
+                        // Ensure content is visible
+                        document.getElementById('sceneLoading').style.display = 'none';
+                        document.getElementById('sceneContent').style.display = 'block';
+                        document.getElementById('sceneError').style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('❌ DEBUG: Error quietly loading latest scene:', error);
+                // Don't show error for quiet updates
+            }
+        }
+        
+        function displayScene(sceneData) {
+            try {
+                console.log('🔍 DEBUG: displayScene called with:', sceneData);
+                
+                const metadata = sceneData.metadata;
+                console.log('🔍 DEBUG: metadata:', metadata);
+                
+                // Set scene image
+                const sceneImage = document.getElementById('sceneImage');
+                console.log('🔍 DEBUG: sceneImage element:', sceneImage);
+                console.log('🔍 DEBUG: image_url:', metadata.image_url);
+                sceneImage.src = metadata.image_url;
+                
+                // Set scene description
+                const sceneDescription = document.getElementById('sceneDescription');
+                console.log('🔍 DEBUG: sceneDescription element:', sceneDescription);
+                console.log('🔍 DEBUG: szenenbeschreibung:', metadata.szenenbeschreibung);
+                sceneDescription.textContent = metadata.szenenbeschreibung || 'Keine Beschreibung verfügbar';
+                
+                // Set scene metadata
+                const sceneNameElement = document.getElementById('sceneName');
+                console.log('🔍 DEBUG: sceneName element:', sceneNameElement);
+                sceneNameElement.textContent = sceneData.scene_name;
+                
+                // Format generation time
+                if (metadata.generation_timestamp) {
+                    const genTime = new Date(metadata.generation_timestamp);
+                    document.getElementById('sceneGeneratedTime').textContent = genTime.toLocaleString('de-DE');
+                    console.log('🔍 DEBUG: generation_timestamp set:', genTime.toLocaleString('de-DE'));
+                } else {
+                    document.getElementById('sceneGeneratedTime').textContent = '-';
+                    console.log('🔍 DEBUG: No generation_timestamp');
+                }
+                
+                // Set mood
+                if (metadata.llm_result && metadata.llm_result.stimmung) {
+                    document.getElementById('sceneMood').textContent = metadata.llm_result.stimmung;
+                    console.log('🔍 DEBUG: mood set:', metadata.llm_result.stimmung);
+                } else {
+                    document.getElementById('sceneMood').textContent = '-';
+                    console.log('🔍 DEBUG: No mood available');
+                }
+                
+                // Set generation duration
+                if (metadata.generation_time_seconds) {
+                    document.getElementById('sceneGenerationTime').textContent = `${metadata.generation_time_seconds.toFixed(1)}s`;
+                    console.log('🔍 DEBUG: generation_time_seconds set:', metadata.generation_time_seconds);
+                } else {
+                    document.getElementById('sceneGenerationTime').textContent = '-';
+                    console.log('🔍 DEBUG: No generation_time_seconds');
+                }
+                
+                console.log('✅ DEBUG: Scene displayed successfully:', sceneData.scene_name);
+            } catch (error) {
+                console.error('❌ DEBUG: Error displaying scene:', error);
+                console.error('❌ DEBUG: Error stack:', error.stack);
+                throw error;
+            }
+        }
+        
+        async function loadSceneHistory() {
+            try {
+                console.log('🔍 DEBUG: Loading scene history...');
+                const response = await fetch('/api/all-scenes');
+                const data = await response.json();
+                
+                console.log('🔍 DEBUG: Scene history data:', data);
+                
+                const container = document.getElementById('sceneHistoryList');
+                
+                if (data.scenes.length === 0) {
+                    console.log('🔍 DEBUG: No scenes found');
+                    container.innerHTML = '<p class="text-center text-muted">Keine Szenen vorhanden</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // Display only complete scenes
+                const completeScenes = data.scenes.filter(scene => scene.is_complete);
+                console.log('🔍 DEBUG: Complete scenes:', completeScenes.length, 'of', data.scenes.length);
+                
+                completeScenes.forEach(scene => {
+                    const item = document.createElement('div');
+                    item.className = 'scene-history-item';
+                    
+                    if (scene.scene_name === currentSceneName) {
+                        item.classList.add('active');
+                    }
+                    
+                    const created = new Date(scene.metadata_created).toLocaleString('de-DE');
+                    
+                    item.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <img src="/api/scene-image/${scene.scene_name}_image.png" 
+                                     alt="${scene.scene_name}" 
+                                     class="scene-thumbnail">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${scene.scene_name}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> ${created}
+                                </small>
+                            </div>
+                            <div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add click handler
+                    item.addEventListener('click', async function() {
+                        await loadSpecificScene(scene.scene_name);
+                        
+                        // Update active state
+                        document.querySelectorAll('.scene-history-item').forEach(el => {
+                            el.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    });
+                    
+                    container.appendChild(item);
+                });
+                
+                // Show count of pending scenes
+                const pendingCount = data.scenes.filter(s => !s.is_complete).length;
+                if (pendingCount > 0) {
+                    const pendingInfo = document.createElement('p');
+                    pendingInfo.className = 'text-center text-muted mt-3';
+                    pendingInfo.innerHTML = `<i class="fas fa-hourglass-half"></i> ${pendingCount} Szene(n) werden noch verarbeitet...`;
+                    container.appendChild(pendingInfo);
+                }
+                
+            } catch (error) {
+                console.error('Error loading scene history:', error);
+                document.getElementById('sceneHistoryList').innerHTML = '<p class="text-center text-danger">Fehler beim Laden der Historie</p>';
+            }
+        }
+        
+        // Silent version of loadSceneHistory that doesn't log errors to UI
+        async function loadSceneHistoryQuiet() {
+            try {
+                console.log('🔍 DEBUG: Quietly loading scene history...');
+                const response = await fetch('/api/all-scenes');
+                const data = await response.json();
+                
+                const container = document.getElementById('sceneHistoryList');
+                
+                if (data.scenes.length === 0) {
+                    container.innerHTML = '<p class="text-center text-muted">Keine Szenen vorhanden</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // Display only complete scenes
+                const completeScenes = data.scenes.filter(scene => scene.is_complete);
+                console.log('🔍 DEBUG: Quietly updating scene history:', completeScenes.length, 'complete scenes');
+                
+                completeScenes.forEach(scene => {
+                    const item = document.createElement('div');
+                    item.className = 'scene-history-item';
+                    
+                    if (scene.scene_name === currentSceneName) {
+                        item.classList.add('active');
+                    }
+                    
+                    const created = new Date(scene.metadata_created).toLocaleString('de-DE');
+                    
+                    item.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <img src="/api/scene-image/${scene.scene_name}_image.png" 
+                                     alt="${scene.scene_name}" 
+                                     class="scene-thumbnail">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${scene.scene_name}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> ${created}
+                                </small>
+                            </div>
+                            <div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add click handler
+                    item.addEventListener('click', async function() {
+                        await loadSpecificScene(scene.scene_name);
+                        
+                        // Update active state
+                        document.querySelectorAll('.scene-history-item').forEach(el => {
+                            el.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    });
+                    
+                    container.appendChild(item);
+                });
+                
+                // Show count of pending scenes
+                const pendingCount = data.scenes.filter(s => !s.is_complete).length;
+                if (pendingCount > 0) {
+                    const pendingInfo = document.createElement('p');
+                    pendingInfo.className = 'text-center text-muted mt-3';
+                    pendingInfo.innerHTML = `<i class="fas fa-hourglass-half"></i> ${pendingCount} Szene(n) werden noch verarbeitet...`;
+                    container.appendChild(pendingInfo);
+                }
+                
+            } catch (error) {
+                console.error('Error quietly loading scene history:', error);
+                // Don't update UI for quiet errors
+            }
+        }
+        
+        async function loadSpecificScene(sceneName) {
+            try {
+                console.log('🔍 DEBUG: loadSpecificScene called with:', sceneName);
+                
+                // Set flag to prevent auto-updates when viewing historical scene
+                isViewingHistoricalScene = true;
+                console.log('🔍 DEBUG: Set isViewingHistoricalScene = true');
+                
+                // Show loading state
+                document.getElementById('sceneLoading').style.display = 'block';
+                document.getElementById('sceneContent').style.display = 'none';
+                document.getElementById('sceneError').style.display = 'none';
+                
+                // Load scene using the specific endpoint
+                console.log('🔍 DEBUG: Fetching scene from:', `/api/scene/${sceneName}`);
+                const response = await fetch(`/api/scene/${sceneName}`);
+                
+                console.log('🔍 DEBUG: Response status:', response.status);
+                console.log('🔍 DEBUG: Response ok:', response.ok);
+                
+                if (response.status === 404) {
+                    console.log('❌ DEBUG: Scene not found (404)');
+                    throw new Error('Szene nicht gefunden');
+                }
+                
+                if (response.status === 202) {
+                    console.log('⏳ DEBUG: Scene generation in progress (202)');
+                    // Scene generation in progress
+                    document.getElementById('sceneStatusBadge').className = 'badge badge-scene-processing ms-2';
+                    document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bild wird generiert...';
+                    return;
+                }
+                
+                if (response.ok) {
+                    console.log('✅ DEBUG: Response ok, parsing JSON...');
+                    const data = await response.json();
+                    console.log('🔍 DEBUG: Received scene data:', data);
+                    
+                    currentSceneName = data.scene_name;
+                    
+                    // Display the scene
+                    console.log('🔍 DEBUG: Calling displayScene...');
+                    displayScene(data);
+                    
+                    // Update status
+                    document.getElementById('sceneStatusBadge').className = 'badge badge-scene-complete ms-2';
+                    document.getElementById('sceneStatusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Szene geladen';
+                    
+                    // Hide "return to latest" button (not needed for current scene)
+                    document.getElementById('returnToLatestBtn').style.display = 'none';
+                    
+                    // Show cinema button (scene is available)
+                    document.getElementById('cinemaBtn').style.display = 'block';
+                    
+                    // Hide loading, show content
+                    document.getElementById('sceneLoading').style.display = 'none';
+                    document.getElementById('sceneContent').style.display = 'block';
+                } else {
+                    console.log('❌ DEBUG: Response not ok, status:', response.status);
+                    const errorText = await response.text();
+                    console.log('❌ DEBUG: Error response text:', errorText);
+                    throw new Error(`Fehler beim Laden der Szene (Status: ${response.status})`);
+                }
+            } catch (error) {
+                console.error('❌ DEBUG: Error loading specific scene:', error);
+                console.error('❌ DEBUG: Error stack:', error.stack);
+                
+                // Show error state
+                document.getElementById('sceneLoading').style.display = 'none';
+                document.getElementById('sceneContent').style.display = 'none';
+                document.getElementById('sceneError').style.display = 'block';
+                document.getElementById('sceneErrorMessage').textContent = error.message;
+                
+                document.getElementById('sceneStatusBadge').className = 'badge bg-danger ms-2';
+                document.getElementById('sceneStatusBadge').textContent = 'Fehler';
+                
+                // Hide cinema button on error
+                document.getElementById('cinemaBtn').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 
